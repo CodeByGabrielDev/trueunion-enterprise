@@ -1,8 +1,7 @@
 package br.com.TrueUnion.TrueUnion.Entities;
 
 import java.time.LocalDate;
-
-import org.springframework.cglib.core.Local;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -24,14 +24,19 @@ public class Pagamento {
 	private double valor;
 	@Column(name = "data_pagamento")
 	private LocalDate dataPagamento;
-	@Column(name = "qtd_parcelas", nullable = true)
+	@Column(name = "qtd_parcelas")
 	private int quantidadeParcelas;
 	@ManyToOne
-	@JoinColumn(name = "id_pagamento")
+	@JoinColumn(name = "id_forma_pgto")
 	private FormaPgtos formaPagamento;
 	@ManyToOne
 	@JoinColumn(name = "id_despesa")
 	private Despesas despesa;
+	@OneToMany(mappedBy = "pagamento")
+	private List<ParcelamentoPagamento>parcelas;
+	public Pagamento() {
+
+	}
 
 	public Pagamento(double valor, int quantidadeParcelas, FormaPgtos formaPagamento) {
 		this.valor = valor;
@@ -87,6 +92,5 @@ public class Pagamento {
 	public void setDespesa(Despesas despesa) {
 		this.despesa = despesa;
 	}
-	
-	
+
 }

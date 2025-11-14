@@ -3,6 +3,7 @@ package br.com.TrueUnion.TrueUnion.Controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,15 +14,18 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.com.TrueUnion.TrueUnion.DTOs.RequestDTOs.EventoCreateRequest;
-import br.com.TrueUnion.TrueUnion.Entities.Evento;
 import br.com.TrueUnion.TrueUnion.Entities.Usuario;
 import br.com.TrueUnion.TrueUnion.ResponseDTOs.ConvidadosEmEventosResponse;
+import br.com.TrueUnion.TrueUnion.ResponseDTOs.DashboardFinanceiroDeUmEvento;
 import br.com.TrueUnion.TrueUnion.ResponseDTOs.EventoResponse;
+import br.com.TrueUnion.TrueUnion.ResponseDTOs.RelatorioResponse;
+import br.com.TrueUnion.TrueUnion.Services.DashboardService;
 import br.com.TrueUnion.TrueUnion.Services.EventoService;
 import br.com.TrueUnion.TrueUnion.Services.LoginService;
-import br.com.TrueUnion.TrueUnion.Utils.Utils;
+import br.com.TrueUnion.TrueUnion.Services.RelatorioService;
 
 @RestController
 @RequestMapping("/api-trueunion/events")
@@ -30,6 +34,10 @@ public class EventoController {
 	EventoService eventoService;
 	@Autowired
 	LoginService loginService;
+	@Autowired
+	RelatorioService relatorio;
+	@Autowired
+	DashboardService dashboard;
 
 	@PostMapping
 	public ResponseEntity<EventoResponse> criarEvento(@RequestHeader("Authorization") String header,
@@ -64,9 +72,7 @@ public class EventoController {
 		String token = header.replace("Bearer ", "").trim();
 
 		Usuario usuarioPegoPeloToken = this.loginService.getUsuarioByToken(token);
-
-		List<EventoResponse> retornoNaTela = this.eventoService.validarConvitesEnviadosParaMim(usuarioPegoPeloToken);
-		return retornoNaTela;
+		return this.eventoService.validarConvitesEnviadosParaMim(usuarioPegoPeloToken);
 	}
 
 	@PutMapping("/invites/{idEvento}/")
@@ -87,8 +93,8 @@ public class EventoController {
 		this.eventoService.updateEvento(IdEvento, evento);
 	}
 
-	@PutMapping("/{idEvento}")
-	public EventoResponse cancelarEvento(@RequestHeader String header, @RequestParam String senha,
+	@PutMapping("/{idEvento}/cancellation")
+	public EventoResponse cancelarEvento(@RequestHeader("Authorization") String header, @RequestParam String senha,
 			@PathVariable int idEvento, @RequestParam String motivoCancelamento) {
 
 		String token = header.replace("Bearer ", "").trim();
@@ -108,4 +114,25 @@ public class EventoController {
 		return this.eventoService.buscarEventoPeloNome(usuario, nomeEvento);
 	}
 
+	@GetMapping("/{idEvento}/reports")
+	public List<RelatorioResponse> puxarRelatorios(@RequestHeader("Authorization") String header,
+			@PathVariable int idEvento) {
+
+		String token = header.replace("Bearer ", "").trim();
+
+		Usuario usuarioPegoPeloToken = this.loginService.getUsuarioByToken(token);
+
+		return this.relatorio.tirarRelatorio(usuarioPegoPeloToken, idEvento);
+	}
+
+	@GetMapping("/{idEvento}/dashboard")
+	public DashboardFinanceiroDeUmEvento dashboardRelacionadoAoEvento(@RequestHeader("Authorization") String header,
+			@PathVariable int idEvento) {
+
+		String token = header.replace("Bearer ", "").trim();
+
+		Usuario usuarioPegoPeloToken = this.loginService.getUsuarioByToken(token);
+		return dashboard.mostrarDashboardComBaseNoEvento(idEvento, usuarioPegoPeloToken);
+
+	}
 }

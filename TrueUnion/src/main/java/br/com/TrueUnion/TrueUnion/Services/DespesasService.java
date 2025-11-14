@@ -42,7 +42,7 @@ public class DespesasService {
 		Evento evento = this.event.findById(idEvento)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-		if (evento.getDonoEvento().getId() == usuarioLogado.getId()) {
+		if (evento.getDonoEvento().getId() == usuarioLogado.getId() && !evento.isConcluido() && !evento.isCancelada()) {
 			Despesas despesaEntity = new Despesas(categoria, despesa.getValorDaDespesa(), evento, despesa.getDesc());
 			this.despesa.save(despesaEntity);
 			this.relatorio.alimentaRelatorio(despesaEntity, evento);

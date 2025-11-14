@@ -51,16 +51,15 @@ public class TarefaController {
 		return ResponseEntity.ok(this.tarefaService.criarTask(task, idEvento, eventosDoUsuario));
 	}
 
-	@GetMapping
-	public List<TarefaResponse> listarTarefasDisponiveisPorEvento(@RequestHeader("Authorization") String header) {
+	@GetMapping("/events/{idEvento}/")
+	public List<TarefaResponse> listarTarefasDisponiveisPorEvento(@RequestHeader("Authorization") String header,
+			@PathVariable int idEvento) {
 		String token = header.replace("Bearer ", "").trim();
 
 		Usuario usuario = this.loginSessao.findUsuarioByToken(token)
 				.orElseThrow(() -> new RuntimeException("Token nao encontrado!"));
 
-		Iterable<Evento> listaDeEventos = this.evento.findEventoByDono(usuario);
-
-		return this.tarefaService.listarTarefasPorEvento(listaDeEventos);
+		return this.tarefaService.listarTarefasPorEvento(idEvento,usuario);
 	}
 
 	@PutMapping("/{idTarefa}")

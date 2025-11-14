@@ -62,7 +62,7 @@ public class EventoService {
 			} else {
 				Evento eventoEntity = new Evento(evento.getNome(), evento.getOrcamento(), evento.getLocal(),
 						evento.getDataInicio(), evento.getDataFim(), evento.getDescricao());
-
+				eventoEntity.setTotalDeDespesasAtuais(0.0);
 				eventoEntity.setDonoEvento(usuarioLogado);
 				eventoEntity.setMotivoCancelamento(null);
 				eventoEntity.setPassouOrcamento(false);
@@ -99,7 +99,13 @@ public class EventoService {
 				throw new ResponseStatusException(HttpStatus.CONFLICT);
 			} else {
 				if (!usuarioPeloEmail.isInativo()) {
-					ConvidadosEmEventos convidar = new ConvidadosEmEventos(usuarioPeloEmail, eventoFind);
+					ConvidadosEmEventos convidar = new ConvidadosEmEventos(usuarioPeloEmail, usuarioPeloEmail.getNome(),
+							eventoFind, eventoFind.getNome(),
+							this.statusRepository.findById(1)
+									.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)),
+							this.statusRepository.findById(1)
+									.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND))
+									.getDescProgramador());
 					convidar.setStatus(this.statusRepository.findById(1)
 							.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
 
@@ -170,31 +176,31 @@ public class EventoService {
 	}
 
 	public List<EventoResponse> validarConvitesEnviadosParaMim(Usuario usuario) {
+		List<EventoResponse> visualizacaoNaTela = new ArrayList<>();
+		List<Evento> listaDeEventos = this.event.findEventosQueFuiConvidado(usuario);
 
-		Iterable<Evento> listaDeEventosQueOUsuarioEstaConvidado = this.convidadosEmEventos
-				.eventosDisponiveisParaVerificar(usuario);
-		List<EventoResponse> listaDeEventosParaJogarNaTela = new ArrayList<>();
-		for (Evento evento : listaDeEventosQueOUsuarioEstaConvidado) {
-			EventoResponse respostaEmTela = new EventoResponse(evento.getId(), evento.getNome(),
-					evento.getOrcamentoEvento(), evento.getLocal(), evento.getDataInicio(), evento.getDataFim(),
-					evento.getDescricao());
-			listaDeEventosParaJogarNaTela.add(respostaEmTela);
+		for (Evento e : listaDeEventos) {
+			visualizacaoNaTela.add(new EventoResponse(e.getId(), e.getNome(), e.getOrcamentoEvento(), e.getLocal(),
+					e.getDataInicio(), e.getDataFim(), e.getDescricao()));
 		}
-		return listaDeEventosParaJogarNaTela;
+		return visualizacaoNaTela;
 	}
 
 	@Transactional
 	public void responderConvitePendente(Usuario usuario, int idEvento, int idStatusRsvp) {
-		Iterable<Evento> eventosDisponiveis = this.convidadosEmEventos.eventosDisponiveisParaVerificar(usuario);
-		for (Evento e : eventosDisponiveis) {
-			if (e.getId() == idEvento) {
-				ConvidadosEmEventos linhaDeConvidados = this.convidadosEmEventos.puxarLinhaConvidadosEmEventos(e,
-						usuario);
-				linhaDeConvidados.setStatus(this.statusRepository.findById(idStatusRsvp)
-						.orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT)));
-				this.convidadosEmEventos.save(linhaDeConvidados);
-				break;
+		Evento evento = this.event.findById(idEvento)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		ConvidadosEmEventos convidadoLinha = this.convidadosEmEventos.puxarLinhaConvidadosEmEventos(evento, usuario);
+		if (idStatusRsvp != 1) {
+			if (convidadoLinha.getStatus().getId_RSVP() != 1) {
+				convidadoLinha.setStatus(this.statusRepository.findById(idStatusRsvp)
+						.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
+				this.convidadosEmEventos.save(convidadoLinha);
+			} else {
+				throw new ResponseStatusException(HttpStatus.CONFLICT);
 			}
+		} else {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 		}
 
 	}

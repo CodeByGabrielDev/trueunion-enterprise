@@ -46,19 +46,21 @@ public class TarefaService {
 
 	}
 
-	public List<TarefaResponse> listarTarefasPorEvento(Iterable<Evento> eventosDoUsuarioAtual) {
-		List<TarefaResponse> listaDeTarefas = new ArrayList<>();
-		for (Evento evento : eventosDoUsuarioAtual) {
-			if (evento != null) {
-				List<Tarefa> listaDeTarefasBaseadoNoEvento = this.tarefa.findTarefasByEvento(evento);
-				for (Tarefa tarefa : listaDeTarefasBaseadoNoEvento) {
-					TarefaResponse respostaEmTela = new TarefaResponse(tarefa.getDesc(), tarefa.getPrazo(),
-							tarefa.getEvento().getNome(), false);
-					listaDeTarefas.add(respostaEmTela);
-				}
+	public List<TarefaResponse> listarTarefasPorEvento(int idEvento, Usuario usuario) {
+
+		Evento evento = this.evento.findById(idEvento)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		List<TarefaResponse> tarefasEmTela = new ArrayList<>();
+		if (evento.getDonoEvento().getId() == usuario.getId()) {
+			List<Tarefa> listaDeTarefas = this.tarefa.findTarefasByEvento(evento);
+			for (Tarefa t : listaDeTarefas) {
+				tarefasEmTela
+						.add(new TarefaResponse(t.getDesc(), t.getPrazo(), t.getEvento().getNome(), t.isAtrasada()));
 			}
+			return tarefasEmTela;
+		} else {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 		}
-		return listaDeTarefas;
 	}
 
 	public TarefaResponse atualizarTarefa(TarefaRequest tarefa, int idTarefa) {
