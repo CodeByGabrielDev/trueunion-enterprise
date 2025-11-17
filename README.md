@@ -84,8 +84,6 @@ O projeto segue uma arquitetura em camadas:
 
 Controller → Service → Repository → Entity → Database
 
-yaml
-Copiar código
 
 ### Destaques técnicos:
 - Controllers limpos e RESTful  
@@ -138,11 +136,7 @@ Copiar código
 
 **Gabriel Lima de Oliveira**  
 Backend Developer – Java | Spring Boot | SQL Server  
-
-📍 Blumenau – SC  
-🔗 LinkedIn: *seu link aqui*  
-💻 GitHub: *seu link aqui*  
-
+ 
 ---
 
 ## 💬 Mensagem Final
