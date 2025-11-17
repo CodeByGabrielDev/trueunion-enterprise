@@ -1,120 +1,150 @@
-# 💍 TrueUnion – Wedding Management API
+# 💍 TrueUnion – Wedding Management API (B2C Version)
 
-> **Enterprise-level wedding management system built with Java 17 and Spring Boot**, designed to streamline event planning, financial control, and guest management — all within a clean, scalable, and RESTful architecture.
+Plataforma backend completa para gestão de casamentos, desenvolvida em **Java 17 + Spring Boot**, estruturada com padrões profissionais de engenharia de software, arquitetura MVC e integrações avançadas com **SQL Server**.
+
+O TrueUnion B2C foi criado para atender casais que desejam organizar o próprio casamento — controlando finanças, convidados, tarefas e eventos de forma intuitiva e segura.
 
 ---
 
 ## 📘 Sobre o Projeto
 
-O **TrueUnion** é uma plataforma backend desenvolvida para gerenciar casamentos de forma completa — desde o cadastro de usuários e convidados até o controle financeiro e cronograma do evento.
+O TrueUnion B2C nasceu inicialmente como um projeto acadêmico, mas evoluiu para um **projeto enterprise**, com foco em:
 
-Embora tenha nascido como um **projeto acadêmico**, o sistema foi **totalmente refatorado com arquitetura profissional**, aplicando práticas de engenharia de software modernas e integração avançada com **SQL Server**, **triggers**, **views** e **schedulers automáticos**.
+- Arquitetura limpa  
+- Separação de responsabilidades  
+- Boas práticas modernas  
+- Automação de regras de negócio  
+- Uso profissional do SQL Server com triggers e views  
+- MVC com fluxo REST totalmente padronizado  
 
 ---
 
 ## ⚙️ Stack Tecnológica
 
 | Categoria | Tecnologias |
-|------------|--------------|
+|----------|-------------|
 | **Linguagem** | ☕ Java 17 |
 | **Framework** | 🧩 Spring Boot |
-| **ORM / Persistência** | 🗃️ Hibernate / Spring Data JPA |
-| **Banco de Dados** | 🧠 SQL Server – Triggers, Views e Jobs |
-| **Agendamentos** | ⏱️ Spring Scheduler |
-| **Controle de Versionamento** | 🧰 Git / GitHub |
+| **ORM / Persistência** | Spring Data JPA / Hibernate |
+| **Banco de Dados** | SQL Server (Triggers, Views) |
+| **Agendamentos** | Spring Scheduler |
 | **Arquitetura** | MVC + Camadas (Controller → Service → Repository → Entity) |
+| **Versionamento** | Git & GitHub |
 
 ---
 
 ## 🧩 Principais Módulos
 
-### 👤 Módulo de Usuários
-- Cadastro, autenticação e controle de perfis (`NOIVO`, `NOIVA`, `CONVIDADO`)
-- Hash automático de dados sensíveis (senha, e-mail, CPF) via **trigger SQL**
-- Reativação e inativação de contas com histórico mantido
-- Lógica de upgrade de perfil (de convidado para noivo/noiva)
+### 👤 1. **Usuários**
+- Cadastro e autenticação  
+- Perfis: **NOIVO / NOIVA / CONVIDADO**  
+- Trigger automática para segurança:  
+  - Hash de senhas ao inativar  
+  - Restauração ao reativar  
+- Histórico preservado  
 
-### 💒 Módulo de Eventos
-- Criação e gerenciamento completo de eventos vinculados ao usuário logado  
-- Controle de orçamento, local, descrição e período  
-- Cancelamento validado por regras de negócio  
-- Atualização automática de eventos concluídos via **scheduler em Java**
+---
 
-### 💌 Convites (RSVP)
-- Envio de convites com base no e-mail dos convidados  
-- Status dinâmico: *Pendente*, *Confirmado*, *Recusado*  
-- Resposta direta via endpoint REST (`/eventos/{id}/convites`)
+### 💒 2. **Eventos**
+- Criação e gerenciamento completo dos eventos  
+- Controle de orçamento  
+- Validações de data  
+- Cancelamento com regras de negócio  
+- Atualização automática de eventos concluídos via **Scheduler**  
 
-### 💰 Gestão Financeira
-- Registro e acompanhamento de **despesas e pagamentos**
-- Integração com tabela de **categorias de despesa**
-- Relatórios orçamentários automatizados (orçado x gasto)
-- **Views SQL** para otimizar consultas e relatórios
+---
 
-### ✅ Tarefas e Cronograma
-- Criação de tarefas vinculadas ao evento  
-- Identificação automática de tarefas atrasadas via **Spring Scheduler**  
-- Organização por data e status  
+### 💌 3. **Convites (RSVP)**
+- Envio de convites  
+- Status: **Pendente | Confirmado | Recusado**  
+- Resposta via endpoint REST  
+- Prevenção de duplicidade  
+
+---
+
+### 💰 4. **Gestão Financeira**
+- Registro de despesas  
+- Pagamentos com parcelamento  
+- Baixa automática de parcelas  
+- Relatórios financeiros  
+- Views SQL para performance  
+
+---
+
+### 📝 5. **Tarefas**
+- Criação de tarefas por evento  
+- Identificação automática de tarefas atrasadas  
+- Organização por datas e status  
 
 ---
 
 ## 🏗️ Arquitetura do Sistema
 
-O TrueUnion segue uma **arquitetura em camadas**, baseada em boas práticas e separação de responsabilidades:
+O projeto segue uma arquitetura em camadas:
 
-**Controller → Service → Repository → Entity → Database**
+Controller → Service → Repository → Entity → Database
 
-**Controller** – expõe os endpoints RESTful  
-**Service** – centraliza as regras de negócio e transações  
-**Repository** – abstrai a persistência com JPA/Hibernate  
-**Database** – implementa triggers, views e automações SQL Server
+yaml
+Copiar código
 
-Aplicando ainda os princípios de **Clean Architecture** e **SOLID**, o sistema é modular, escalável e fácil de manter.
+### Destaques técnicos:
+- Controllers limpos e RESTful  
+- DTOs para requests e responses  
+- Services centralizando toda regra de negócio  
+- Entities bem mapeadas (ORM)  
+- SQL Server com triggers, views e jobs  
 
 ---
 
-## 🧠 Banco de Dados e Automação
+## 🧠 Banco de Dados – Automação e Segurança
 
 | Tipo | Implementação |
-|------|----------------|
-| **Trigger** | `SEQUESTAR_SENHAS_DE_INATIVOS` – Armazena e hasheia senhas de contas inativas |
-| **Trigger** | `T_DISPARA_ATIVACAO` – Restaura senhas ao reativar contas |
-| **View** | `W_USUARIOS_INATIVOS` – Relatório de contas inativas |
-| **Job (Java)** | `settarEventosConcluidos()` – Atualiza eventos finalizados automaticamente |
+|------|--------------|
+| **Trigger** | `TRG_HASH_INATIVOS` – Hasheia dados ao inativar o usuário |
+| **Trigger** | `TRG_RESTORE_ATIVOS` – Restaura dados ao reativar |
+| **View** | `VW_USUARIOS_INATIVOS` – Relatórios de contas inativas |
+| **Scheduler (Java)** | Atualiza eventos concluídos diariamente |
 
 ---
 
-## 🚀 Evoluções e Melhorias
+## 🚀 Evoluções Implementadas
 
-- Migração e otimização total para **SQL Server**
-- Triggers aprimoradas com `HASHBYTES` e controle de reativação
-- Substituição de eventos SQL por **Schedulers Java**
-- Padronização RESTful em todos os endpoints (`/api-trueunion/...`)
-- Refatoração completa de controllers e services
-- Melhoria de tratamento de erros e responses (`ResponseEntity` e `ResponseStatusException`)
+- Refatoração completa com arquitetura profissional  
+- Padronização total dos endpoints REST  
+- Implementação robusta de DTOs  
+- Melhoria no fluxo financeiro (parcelamento + baixas automáticas)  
+- Views SQL otimizadas  
+- Controllers totalmente limpos  
+- Tratamento de erros com `ResponseStatusException`  
+- Schedulers substituindo jobs SQL  
 
 ---
 
-## 📊 Status do Projeto
+## 📊 Status Atual
 
-🧩 **Versão atual:** Back-end completo e funcional  
-🔧 **Próximas etapas:**  
-- Implementar Spring Security (autenticação e roles)  
-- Documentação de API com Swagger  
-- Integração com o front-end (em desenvolvimento)  
-- Deploy em ambiente Cloud (Render / AWS)
+✔ **Back-end B2C finalizado e funcional**
+
+### Próximas Etapas
+
+- Implementar **Spring Security (JWT + Roles)**  
+- Documentação com Swagger  
+- Integração com front-end  
+- Deploy em ambiente Cloud  
+- Iniciar projeto **TrueUnion B2B**  
 
 ---
 
 ## 👨‍💻 Autor
 
 **Gabriel Lima de Oliveira**  
-Backend Developer | Java | Spring Boot | SQL Server  
+Backend Developer – Java | Spring Boot | SQL Server  
 
-📍 Blumenau - SC  
-🔗 [LinkedIn](https://www.linkedin.com/in/gabriel-lima-892682213)  
-💻 [GitHub](https://github.com/gabriellima-oliveira)
+📍 Blumenau – SC  
+🔗 LinkedIn: *seu link aqui*  
+💻 GitHub: *seu link aqui*  
 
 ---
 
-> 💬 *"TrueUnion começou como um projeto acadêmico, mas hoje é um laboratório real de engenharia de software, aplicando boas práticas, arquitetura limpa e automações corporativas."*
+## 💬 Mensagem Final
+
+> “O TrueUnion começou como um projeto acadêmico, mas hoje é um laboratório real de engenharia de software, aplicando práticas corporativas, arquitetura limpa e automações inteligentes.”
